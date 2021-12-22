@@ -69,4 +69,3 @@ FROM Customer
 LEFT JOIN OrdersInfo
 ON Customer.CustomerID = OrdersInfo.CustomerID
 WHERE OrdersInfo.OrderID IS NULL
-
