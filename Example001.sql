@@ -1,39 +1,3 @@
--- Swapping seats pairs in table seats
--- 1 swap 2, 3 swap 4 etc
--- last number (odd) must remain unswapped
-
-SELECT ID,
-	CASE
-	WHEN ID % 2 = 0 THEN LAG(Student) OVER(ORDER BY ID)
-	WHEN ID % 2 = 1 AND ID=
-							(SELECT MAX(ID) FROM Seats)
-	THEN Student
-	ELSE LEAD(Student) OVER(ORDER BY ID)
-	END AS SWAPPED
-INTO Swapped_seats  -- Add INTO to CREATE a TABLE from the query
-FROM Seats
------------------------------------------------------------------------------------------------------
-Select id,
-       case when (id % 2 = 0) then  lag(student, 1) over (order by id)
-                when (id % 2 = 1) then coalesce (lead(student, 1) over ( order by id), student)
-       end as student
-        
-from Seats
------------------------------------------------------------------------------------------------------
-SELECT ID,
-	CASE
-	WHEN ID % 2 = 0 THEN LAG(Student) OVER(ORDER BY ID)
-	WHEN ID % 2 = 1 AND ID=last_id  -- a little cool trick
-	THEN Student
-	ELSE LEAD(Student) OVER(ORDER BY ID)
-	END AS SWAPPED
-FROM Seats, (SELECT MAX(ID) AS last_id FROM Seats) AS a  -- this is another way to pass the max ID
-
-
-
------------------------------------------------------------------------------------------------------
--- RESUME skills demo
-
 /*
 
 Cleaning customer info table
@@ -63,10 +27,6 @@ SET CustomerID = RTRIM(LTRIM(CustomerID)),
 	CustomerLastName = UPPER(REPLACE(RTRIM(LTRIM(CustomerLastName)), '.', '')),
 	CustomerPhoneNumber = REPLACE(REPLACE(REPLACE(REPLACE(CustomerPhoneNumber, '-', ''), ' ', ''), '(', ''), ')', '')
 
-
-
-Select *
-from Customer
 
 
 /*
