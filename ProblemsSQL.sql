@@ -169,3 +169,82 @@ FROM
  AND request_at BETWEEN '2013-10-01' AND '2013-10-03'
 ) subquery  -- subquery with not banned and in time range
 GROUP BY request_at
+
+/*
+PROBLEM 4
+https://www.hackerrank.com/challenges/15-days-of-learning-sql/problem
+Write a query to print total number of unique hackers who made at least one submission each day
+(starting on the first day of the contest), and find the hacker_id and name of the hacker
+who made maximum number of submissions each day. If more than one such hacker has a maximum
+number of submissions, print the lowest hacker_id. The query should print this information
+for each day of the contest, sorted by the date.
+*/
+
+USE [Practice];
+
+-- setup
+
+CREATE TABLE submissions (
+	submission_date date,
+	submission_id int,
+	hacker_id int,
+	score int);
+
+INSERT INTO submissions VALUES 
+	('2016-03-01', 8494, 20703, 0),('2016-03-01', 22403, 53473,15),
+	('2016-03-01',23965,79722,60),('2016-03-01',30173,36396,70),
+	('2016-03-02',34928,20703,0),('2016-03-02',38740,15758,60),
+	('2016-03-02',42769,79722,25),('2016-03-02',44364,79722,60),
+	('2016-03-03',45440,20703,0),('2016-03-03',49050,36396,70),
+	('2016-03-03',50273,79722,5),('2016-03-04',50344,20703,0),
+	('2016-03-04',51360,44065,90),('2016-03-04',54404,53473,65),
+	('2016-03-04',61533,79722,45),('2016-03-05',72852,20703,0),
+	('2016-03-05',74546,38289,0),('2016-03-05',76487,62529,0),
+	('2016-03-05',82439,36396,10),('2016-03-05',90006,36396,40),
+	('2016-03-06',90404,20703,0);
+
+CREATE TABLE hackers (
+	hacker_id int, name varchar(50));
+
+INSERT INTO hackers VALUES 
+	(15758, 'Rose'),(20703, 'Angela'),
+	(36396,'Frank'),(38289, 'Patrick'),
+	(44065, 'Lisa'),(53473,'Kimberly'),
+	(62529, 'Bonnie'),(79722, 'Michael');
+
+-- solution
+
+SELECT q1.submission_date, q1.recurring_users, q2.hacker_id, hackers.name
+FROM
+(
+	SELECT submission_date,
+		SUM(CASE
+			 WHEN rolling_count = date_order THEN 1 ELSE 0  -- if a user submitted on each day until the day with rank = date_order
+		    END) AS recurring_users				-- then the user's rolling_count at that date is = to the date_order
+									-- therefore we count the user, otherwise we don't
+	FROM
+	(
+		SELECT submission_date, hacker_id,
+			COUNT(hacker_id) OVER (PARTITION BY hacker_id ORDER BY submission_date ASC) AS rolling_count,  -- rolling count
+			DENSE_RANK() OVER (ORDER BY submission_date ASC) AS date_order  -- rank the dates from 1 to 6
+		FROM submissions
+		GROUP BY submission_date, hacker_id  -- GROUP BY both to get rid of users who submitted more than once on a certain day
+	) rc  -- subquery to do a rolling count of the users submitting at least once per day
+	GROUP BY submission_date
+) q1  -- query 1 to return the rolling count of users who submitted each day until a given date
+
+JOIN  -- join q1 and q2
+
+(
+	SELECT submission_date, hacker_id, daily_sub,
+		RANK() OVER (PARTITION BY submission_date ORDER BY daily_sub DESC, hacker_id ASC) sub_rank
+	FROM
+	(
+		SELECT submission_date, hacker_id, COUNT(hacker_id) AS daily_sub
+		FROM submissions
+		GROUP BY submission_date, hacker_id
+	) AS count_sub  -- subquery to count the number of daily submissions per user
+) q2  -- subquery to rank the daily submissions on the basis of quantity and ID
+ON q1.submission_date = q2.submission_date AND q2.sub_rank = 1  -- join on date and consider only rank 1 users
+JOIN hackers
+ON hackers.hacker_id = q2.hacker_id  -- join the user name
