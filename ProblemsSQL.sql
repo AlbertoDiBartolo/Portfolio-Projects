@@ -248,3 +248,71 @@ JOIN  -- join q1 and q2
 ON q1.submission_date = q2.submission_date AND q2.sub_rank = 1  -- join on date and consider only rank 1 users
 JOIN hackers
 ON hackers.hacker_id = q2.hacker_id  -- join the user name
+
+/*
+PROBLEM 6
+https://leetcode.com/problems/nth-highest-salary/
+
+Table: Employee
+
++-------------+------+
+| Column Name | Type |
++-------------+------+
+| id          | int  |
+| salary      | int  |
++-------------+------+
+id is the primary key column for this table.
+Each row of this table contains information about the salary of an employee.
+Write an SQL query to report the nth highest salary from the Employee table. If there is no nth highest salary, the query should report null.
+The query result format is in the following example.
+*/
+
+CREATE FUNCTION getNthHighestSalary (@N INT)
+RETURNS INT AS
+BEGIN
+  DECLARE @nth_salary INT
+	SELECT @nth_salary = MAX(Salary)
+	FROM
+		(
+		SELECT *, DENSE_RANK() OVER (ORDER BY salary DESC) rnk
+		FROM EmployeeSalary
+		) AS a
+	WHERE rnk = @N
+  RETURN @nth_salary;
+END
+
+/*
+PROBLEM 7
+
+Table: Logs
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| num         | varchar |
++-------------+---------+
+id is the primary key for this table.
+Write an SQL query to find all numbers that appear at least three times consecutively.
+Return the result table in any order.
+*/
+
+-- setup
+
+CREATE TABLE Logs (
+	id INT, num varchar(10));
+
+INSERT INTO Logs VALUES
+	(1, '1'), (2, '1'), (3, '1'), (4, '3'), (5, '3'),
+	(6, '4'), (7, '4'), (8, '4'), (9, '4'), (10, '3');
+
+-- solution
+
+SELECT DISTINCT num AS ConsecutiveNums
+FROM
+(
+	SELECT *,
+	  LAG(num, 1) OVER (ORDER BY id ASC) AS lag1,
+	  LAG(num, 2) OVER (ORDER BY id ASC) AS lag2
+	FROM Logs
+) AS a
+WHERE num = lag1 AND lag1 = lag2
