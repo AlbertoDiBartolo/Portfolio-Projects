@@ -63,3 +63,4 @@ WHERE OrdersInfo.OrderID IS NULL;
 UPDATE [dbo].[Customer]
 SET CustomerPhoneNumber = '3554887122'
 WHERE CustomerPhoneNumber = '3337722313';
+
