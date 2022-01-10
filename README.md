@@ -1,2 +1,1 @@
-# SQLResume
-Examples of what I can do in SQL
+Examples of coding on SQL and more
