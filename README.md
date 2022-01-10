@@ -1,1 +1,1 @@
-Examples of coding on SQL and more
+Examples of self-taught coding skills
