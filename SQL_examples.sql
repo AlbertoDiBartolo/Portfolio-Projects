@@ -1,12 +1,12 @@
 /*
-Cleaning customer info table
-	- convert fields to appropriate data type with appropriate constraints
-	- clean trailing spaces, unnecessary dots, etc.
-	- capitalize names
+Cleaning customer info table, assigning constraints, etc
+Table fields:
+CustomerID | CustomerFirstName | CustomerLastName | CustomerPhoneNumber | CustomerEmail | DateOfRegistration | DateOfBirth
 */
 
-USE [Practice]
+USE [Practice];
 
+-- Assign NOT NULL and UNIQUE constraints
 ALTER TABLE [dbo].[Customer] ALTER COLUMN [DateOfBirth] DATE NOT NULL;
 ALTER TABLE [dbo].[Customer] ALTER COLUMN [DateOfRegistration] DATETIME NOT NULL;
 ALTER TABLE [dbo].[Customer] ALTER COLUMN [CustomerID] INT NOT NULL;
@@ -16,11 +16,33 @@ ALTER TABLE [dbo].[Customer] ALTER COLUMN [CustomerEmail] NVARCHAR(320) NOT NULL
 ALTER TABLE [dbo].[Customer] ALTER COLUMN [CustomerPhoneNumber] VARCHAR(15) NOT NULL;
 ALTER TABLE [dbo].[Customer] ADD UNIQUE   ([CustomerID], [CustomerEmail], [CustomerPhoneNumber]);
 
+-- Add check constraints to not allow certain characters for certain fields in the future
+ALTER TABLE [dbo].[Customer] WITH NO CHECK
+ADD CONSTRAINT chk_firstname CHECK
+(REPLACE(RTRIM(LTRIM(CustomerFirstName)), '.', '') = CustomerFirstName);
+ALTER TABLE [dbo].[Customer] WITH NO CHECK
+ADD CONSTRAINT chk_lastname CHECK
+(REPLACE(RTRIM(LTRIM(CustomerLastName)), '.', '') = CustomerLastName);
+ALTER TABLE [dbo].[Customer] WITH NO CHECK
+ADD CONSTRAINT chk_phonenumber CHECK
+(REPLACE(REPLACE(REPLACE(REPLACE(CustomerPhoneNumber, '-', ''), ' ', ''), '(', ''), ')', '') = CustomerPhoneNumber);
+
+-- Remove unwanted characters
 UPDATE [dbo].[Customer]
 SET 	CustomerID = RTRIM(LTRIM(CustomerID)),
 	CustomerFirstName = UPPER(REPLACE(RTRIM(LTRIM(CustomerFirstName)), '.', '')),
 	CustomerLastName = UPPER(REPLACE(RTRIM(LTRIM(CustomerLastName)), '.', '')),
 	CustomerPhoneNumber = REPLACE(REPLACE(REPLACE(REPLACE(CustomerPhoneNumber, '-', ''), ' ', ''), '(', ''), ')', '');
+
+-- Create check constraint to only allow 18+ years old
+ALTER TABLE [dbo].[Customer]
+ADD CONSTRAINT chk_adult CHECK
+(DATEDIFF(YEAR, DateOfBirth, GETDATE()) >= 18);
+
+-- Create constraint to only allow phonenumbers with length between 9 and 15 digits
+ALTER TABLE [dbo].[Customer]
+ADD CONSTRAINT chk_phone CHECK
+(LEN(CustomerPhoneNumber) BETWEEN 9 and 15);
 
 /*
 Manipulating data to create new tables
