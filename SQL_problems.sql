@@ -1,4 +1,5 @@
 /*
+PRACTICE
 
 https://leetcode.com/problems/department-highest-salary/
 Table Employee
