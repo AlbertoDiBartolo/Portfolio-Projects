@@ -1,7 +1,7 @@
 %{
 PronyErrorNT v1.1 by Alberto Di Bartolo
 This function is used to fit experimental master curves to Prony series
-(see Generalised Maxwell Model, or multi-branch model) primarely for
+(see Generalised Maxwell Model) primarely for
 stress relaxation master curve. It calculates the error between
 experimental values of a Master Curve and values calculated from the
 multi-branch model with NT non-equi branches. It needs the values of
