@@ -1,4 +1,5 @@
 /*
+SQL PRACTICE
 Cleaning customer info table, assigning constraints, etc
 Table fields:
 CustomerID | CustomerFirstName | CustomerLastName | CustomerPhoneNumber | CustomerEmail | DateOfRegistration | DateOfBirth
