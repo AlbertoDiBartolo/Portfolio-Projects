@@ -1,3 +1,5 @@
+% Collection of all required scripts
+
 %{
 PronyErrorNT v1.1 by Alberto Di Bartolo
 This function is used to fit experimental master curves to Prony series
